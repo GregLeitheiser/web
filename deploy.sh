@@ -3,5 +3,5 @@
 #login = `aws ecr get-login --no-include-email`
 #exec $login
 
-docker.exe tag servantscode/web:latest 822695322560.dkr.ecr.us-east-2.amazonaws.com/servantscode/web:latest
-docker.exe push 822695322560.dkr.ecr.us-east-2.amazonaws.com/servantscode/web:latest
+docker.exe tag gregleithieser/sc-web:latest gregleitheiser/sc-web:latest
+docker.exe push gregleitheiser/sc-web:latest

@@ -11,7 +11,7 @@ include $(dpl)
 export $(shell sed 's/=.*//' $(dpl))
 
 # grep the version from the mix file
-VERSION=$(shell ./version.sh)
+VERSION=$(cat ./version.text)
 
 # Get the current dir
 #PWD := $(abspath $(lastword $(MAKEFILE_LIST)))
@@ -31,16 +31,13 @@ help: ## This help.
 # DOCKER TASKS
 # Build the container
 build: ## Build the container
-	docker.exe build -t servantscode/$(APP_NAME) .
+	docker.exe build -t gregleitheiser/$(APP_NAME) .
 
 build-nc: ## Build the container without caching
-	docker.exe build --no-cache -t servantscode/$(APP_NAME) .
+	docker.exe build --no-cache -t gregleitheiser/$(APP_NAME) .
 
 run: ## Run container on port configured in `config.env`
-	docker.exe run -dit --env-file=./config.env -p=$(EXT_PORT):$(INT_PORT) --name="$(APP_NAME)" servantscode/$(APP_NAME)
-
-develop:
-	docker.exe run --mount src=$(PWD)\\public-html,target=/usr/local/apache2/htdocs,type=bind -dit --env-file=./config.env -p=$(EXT_PORT):$(INT_PORT) --name="$(APP_NAME)" servantscode/$(APP_NAME)
+	docker.exe run -dit --env-file=./config.env -p=$(EXT_PORT):$(INT_PORT) --name=$(APP_NAME) gregleitheiser/$(APP_NAME)
 
 up: build run ## Run container on port configured in `config.env` (Alias to run)
 
@@ -54,38 +51,23 @@ publish: repo-login publish-latest publish-version ## Publish the `{version}` an
 
 publish-latest: tag-latest ## Publish the `latest` taged container to ECR
 	@echo 'publish latest to $(DOCKER_REPO)'
-	docker.exe push $(DOCKER_REPO)/servantscode/$(APP_NAME):latest
+	docker.exe push gregleitheiser/$(APP_NAME):latest
 
 publish-version: tag-version ## Publish the `{version}` taged container to ECR
 	@echo 'publish $(VERSION) to $(DOCKER_REPO)'
-	docker.exe push $(DOCKER_REPO)/servantscode/$(APP_NAME):$(VERSION)
+	docker.exe push gregleitheiser/$(APP_NAME):$(VERSION)
 
 # Docker tagging
 tag: tag-latest tag-version ## Generate container tags for the `{version}` ans `latest` tags
 
 tag-latest: ## Generate container `{version}` tag
 	@echo 'create tag latest'
-	docker.exe tag $(APP_NAME) $(DOCKER_REPO)/servantscode/$(APP_NAME):latest
+	docker.exe tag gregleitheiser/$(APP_NAME) gregleitheiser/$(APP_NAME):latest
 
 tag-version: ## Generate container `latest` tag
 	@echo 'create tag $(VERSION)'
-	docker.exe tag $(APP_NAME) $(DOCKER_REPO)/servantscode/$(APP_NAME):$(VERSION)
+	docker.exe tag gregleitheiser/$(APP_NAME) gregleitheiser/$(APP_NAME):$(VERSION)
 
 # HELPERS
-
-# generate script to login to aws docker repo
-CMD_REPOLOGIN := "eval $$\( aws ecr"
-ifdef AWS_CLI_PROFILE
-CMD_REPOLOGIN += " --profile $(AWS_CLI_PROFILE)"
-endif
-ifdef AWS_CLI_REGION
-CMD_REPOLOGIN += " --region $(AWS_CLI_REGION)"
-endif
-CMD_REPOLOGIN += " get-login --no-include-email \)"
-
-# login to AWS-ECR
-repo-login: ## Auto login to AWS-ECR unsing aws-cli
-	@eval $(CMD_REPOLOGIN)
-
 version: ## Output the current version
 	@echo $(VERSION)
