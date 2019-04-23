@@ -68,6 +68,9 @@ tag-version: ## Generate container `latest` tag
 	@echo 'create tag $(VERSION)'
 	docker.exe tag gregleitheiser/$(APP_NAME) gregleitheiser/$(APP_NAME):$(VERSION)
 
+logs: ## Get logs from running container
+	kubectl.exe logs $(shell kubectl.exe get pods | grep $(APP_NAME) | grep Running | cut -d ' ' -f 1)
+
 # HELPERS
 version: ## Output the current version
 	@echo $(VERSION)
