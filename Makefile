@@ -46,6 +46,9 @@ stop: ## Stop and remove a running container
 
 release: build-nc publish ## Make a release by building and publishing the `{version}` ans `latest` tagged containers to ECR
 
+redeploy:
+	ssh -i ~/.ssh/id_rsa ec2-user@ec2-18-222-146-31.us-east-2.compute.amazonaws.com "./redeploy.sh"
+
 # Docker publish
 publish: publish-latest publish-version ## Publish the `{version}` ans `latest` tagged containers to ECR
 
